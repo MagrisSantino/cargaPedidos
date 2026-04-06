@@ -432,56 +432,6 @@ def correr_carga(job_id, ruta_excel, nombre_cliente, endpoint_key, cuenta_key):
 
 # ─── TEMPLATES ───────────────────────────────────────────────────────────────
 
-HOME_HTML = """
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carga de Pedidos</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #0f172a; color: #e2e8f0;
-            min-height: 100vh; display: flex; align-items: center; justify-content: center;
-        }
-        .home { text-align: center; }
-        .home h1 { font-size: 1.8rem; margin-bottom: 12px; color: #f8fafc; }
-        .home p { color: #64748b; margin-bottom: 40px; }
-        .cards { display: flex; gap: 24px; }
-        .card {
-            background: #1e293b; border-radius: 16px; padding: 48px 40px;
-            width: 240px; text-decoration: none; color: #e2e8f0;
-            border: 2px solid #334155; transition: all 0.25s;
-            display: flex; flex-direction: column; align-items: center; gap: 12px;
-        }
-        .card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-        .card .icon { font-size: 3rem; }
-        .card .label { font-size: 1.2rem; font-weight: 600; }
-        .card.deporte:hover { border-color: #6366f1; }
-        .card.moda:hover { border-color: #ec4899; }
-    </style>
-</head>
-<body>
-    <div class="home">
-        <h1>Carga de Pedidos</h1>
-        <p>Selecciona el portal</p>
-        <div class="cards">
-            <a href="/deporte" class="card deporte">
-                <div class="icon">&#9917;</div>
-                <div class="label">Deporte</div>
-            </a>
-            <a href="/moda" class="card moda">
-                <div class="icon">&#128090;</div>
-                <div class="label">Moda</div>
-            </a>
-        </div>
-    </div>
-</body>
-</html>
-"""
-
 FORM_HTML = """
 <!DOCTYPE html>
 <html lang="es">
@@ -496,12 +446,6 @@ FORM_HTML = """
             background: #0f172a; color: #e2e8f0;
             min-height: 100vh; display: flex; align-items: center; justify-content: center;
         }
-        a.back {
-            position: fixed; top: 20px; left: 20px;
-            color: #64748b; text-decoration: none; font-size: 0.9rem;
-            transition: color 0.2s;
-        }
-        a.back:hover { color: #e2e8f0; }
         .container {
             background: #1e293b; border-radius: 16px; padding: 40px;
             width: 520px; box-shadow: 0 25px 50px rgba(0,0,0,0.4);
@@ -576,7 +520,6 @@ FORM_HTML = """
     </style>
 </head>
 <body>
-    <a class="back" href="/">&larr; Volver</a>
     <div class="container">
         <h1>Carga de Pedidos <span>{{ ep.titulo }}</span></h1>
 
@@ -711,11 +654,6 @@ FORM_HTML = """
 
 
 # ─── RUTAS ───────────────────────────────────────────────────────────────────
-
-@app.route('/')
-def home():
-    return render_template_string(HOME_HTML)
-
 
 @app.route('/deporte')
 def deporte():
