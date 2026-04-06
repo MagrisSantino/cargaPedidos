@@ -1,0 +1,41 @@
+name: Build Mac Executables
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pyinstaller
+          pip install -r requirements.txt
+
+      - name: Build CargaPedidos (Deporte)
+        run: pyinstaller --onefile --windowed --name CargaPedidos carga.py
+
+      - name: Build CargaModa (Moda)
+        run: pyinstaller --onefile --windowed --name CargaModa carga_moda_exe.py
+
+      - name: Upload CargaPedidos
+        uses: actions/upload-artifact@v4
+        with:
+          name: CargaPedidos-Mac
+          path: dist/CargaPedidos
+
+      - name: Upload CargaModa
+        uses: actions/upload-artifact@v4
+        with:
+          name: CargaModa-Mac
+          path: dist/CargaModa
