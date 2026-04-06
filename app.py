@@ -655,8 +655,8 @@ FORM_HTML = """
 
 # ─── RUTAS ───────────────────────────────────────────────────────────────────
 
-@app.route('/deporte')
-def deporte():
+@app.route('/deportgm')
+def deportgm():
     return render_template_string(FORM_HTML, ep=ENDPOINTS["deporte"], endpoint_key="deporte")
 
 
