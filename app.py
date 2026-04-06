@@ -75,19 +75,21 @@ def portal_login(session, username, password):
     r = session.post(
         f"{BASE_URL}/Login/Signin",
         data=f"username={http_requests.utils.quote(username)}&password={password}&rememberMe=undefined",
-        headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"})
+        headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
+        timeout=30)
     if r.status_code != 200:
         return False
     session.post(
         f"{BASE_URL}/Login/SigninCompany",
         data=f"CompanyId={COMPANY_ID}",
-        headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"})
+        headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
+        timeout=30)
     return True
 
 
 def extraer_page_key(session, from_controller):
     form_url = f"{BASE_URL}/Sales/SalesOrder/ActionPurchaseOrder?ActionPurchaseOrder=Add&IdPO=0&fromController={from_controller}"
-    form_r = session.get(form_url, headers={"Referer": BASE_URL})
+    form_r = session.get(form_url, headers={"Referer": BASE_URL}, timeout=30)
     session.headers.update({"Referer": form_url})
 
     soup = BeautifulSoup(form_r.text, 'html.parser')
@@ -320,12 +322,14 @@ def correr_carga(job_id, ruta_excel, nombre_cliente, endpoint_key, cuenta_key, d
         ep = ENDPOINTS[endpoint_key]
         cuenta = ep["cuentas"][cuenta_key]
 
+        form_url = f"{BASE_URL}/Sales/SalesOrder/ActionPurchaseOrder?ActionPurchaseOrder=Add&IdPO=0&fromController={ep['from_controller']}"
         session = http_requests.Session()
         session.headers.update({
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
             "X-Requested-With": "XMLHttpRequest",
             "Accept-Language": "es-ES,es;q=0.9",
             "Origin": BASE_URL,
+            "Referer": form_url,
         })
 
         # Login
