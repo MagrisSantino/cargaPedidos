@@ -273,7 +273,7 @@ def actualizar_cantidad(session, linea, cantidad, page_key):
                           "X-Requested-With": "XMLHttpRequest"})
 
 
-def guardar_borrador(session, bp_data, lines, page_key, save_from, save_url_from):
+def guardar_borrador(session, bp_data, lines, page_key, save_from, save_url_from, comentario=''):
     today = date.today()
     today_str = f"{today.month}/{today.day}/{today.year}"
     ship_addr = next((a for a in bp_data.get("Addresses", []) if a.get("AdresType") == "S"), {})
@@ -287,7 +287,7 @@ def guardar_borrador(session, bp_data, lines, page_key, save_from, save_url_from
         "CntctCode": str(bp_data.get("ListContact", [{}])[0].get("CntctCode", "")),
         "SlpCode": str(bp_data.get("SlpCode", "0")),
         "TrnspCode": None, "NumAtCard": "", "CancelDate": None, "ReqDate": None,
-        "OwnerCode": "0", "Comments": "", "PageKey": page_key,
+        "OwnerCode": "0", "Comments": comentario, "PageKey": page_key,
         "SOAddress": {
             "DocEntry": "0",
             "StreetS": ship_addr.get("Street", ""), "StreetB": bill_addr.get("Street", ""),
@@ -312,7 +312,7 @@ def guardar_borrador(session, bp_data, lines, page_key, save_from, save_url_from
 
 # ─── PROCESO DE CARGA ───────────────────────────────────────────────────────
 
-def correr_carga(job_id, ruta_excel, nombre_cliente, endpoint_key, cuenta_key):
+def correr_carga(job_id, ruta_excel, nombre_cliente, endpoint_key, cuenta_key, descripcion=''):
     job = jobs[job_id]
     log_fn = lambda msg: job["logs"].append(msg)
 
@@ -410,7 +410,7 @@ def correr_carga(job_id, ruta_excel, nombre_cliente, endpoint_key, cuenta_key):
         # Guardar
         log_fn(f"\nGuardando borrador ({len(lines)} items)...")
         r = guardar_borrador(session, bp_data, lines, page_key,
-                             ep["save_from"], ep["save_url_from"])
+                             ep["save_from"], ep["save_url_from"], descripcion)
         if r.status_code == 200:
             log_fn("Borrador guardado exitosamente!")
             job["success"] = True
@@ -542,6 +542,11 @@ FORM_HTML = """
         </div>
 
         <div class="form-group">
+            <label>Descripcion / Comentario</label>
+            <input type="text" id="descripcion" placeholder="Opcional">
+        </div>
+
+        <div class="form-group">
             <label>Archivo Excel (SKU / Cantidad)</label>
             <div class="file-upload" id="dropZone">
                 <div class="icon">&#128196;</div>
@@ -616,10 +621,12 @@ FORM_HTML = """
             const statusBar = document.getElementById('statusBar');
             statusBar.className = 'status-bar'; statusBar.style.display = 'none';
 
+            const descripcion = document.getElementById('descripcion').value.trim();
             const fd = new FormData();
             fd.append('endpoint', ENDPOINT);
             fd.append('cuenta', cuenta);
             fd.append('cliente', cliente);
+            fd.append('descripcion', descripcion);
             fd.append('file', file);
 
             fetch('/cargar', { method: 'POST', body: fd })
@@ -670,6 +677,7 @@ def cargar():
     endpoint_key = request.form.get('endpoint')
     cuenta_key = request.form.get('cuenta')
     cliente = request.form.get('cliente', '').strip()
+    descripcion = request.form.get('descripcion', '').strip()
     file = request.files.get('file')
 
     if endpoint_key not in ENDPOINTS:
@@ -690,7 +698,7 @@ def cargar():
 
     threading.Thread(
         target=correr_carga,
-        args=(job_id, tmp.name, cliente, endpoint_key, cuenta_key),
+        args=(job_id, tmp.name, cliente, endpoint_key, cuenta_key, descripcion),
         daemon=True
     ).start()
 
